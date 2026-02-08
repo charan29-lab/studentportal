@@ -1,22 +1,46 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { supabase } from "../lib/supabase";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ name, email, password });
+    setLoading(true);
+    setError("");
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name, // stored in user metadata
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      console.log("User registered:", data.user);
+      // 👉 redirect example:
+      // navigate("/login");
+    }
+
+    setLoading(false);
   };
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center">
       <div className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
-        {/* Left Content — same hero language */}
+        {/* Left Content */}
         <div>
           <span className="inline-block bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             ✨ Create Account
@@ -33,11 +57,15 @@ export default function Register() {
           </p>
         </div>
 
-        {/* Right Form — same card style as Login */}
+        {/* Right Form */}
         <div className="flex justify-center">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
 
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {error && (
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              )}
 
               {/* Full Name */}
               <div>
@@ -52,7 +80,7 @@ export default function Register() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your full name"
-                    className="w-full pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full placeholder:text-gray-300 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -70,7 +98,7 @@ export default function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@gmail.com"
-                    className="w-full pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full placeholder:text-gray-300 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -88,7 +116,7 @@ export default function Register() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full  placeholder:text-gray-300 pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                   <button
                     type="button"
@@ -107,9 +135,10 @@ export default function Register() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-60"
               >
-                Create Account
+                {loading ? "Creating account..." : "Create Account"}
               </button>
 
             </form>

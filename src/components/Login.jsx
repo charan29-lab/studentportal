@@ -1,21 +1,42 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { supabase } from "../lib/supabase";
+import {useNavigate} from "react-router"
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const handleSubmit = (e) => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate()
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ email, password });
+    setLoading(true);
+    setError("");
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      console.log("Logged in user:", data.user);
+  
+      navigate("/");
+    }
+
+
+    setLoading(false);
   };
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center">
       <div className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
 
-        {/* Left Content (same vibe as hero text) */}
+        {/* Left Content */}
         <div>
           <span className="inline-block bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             🔐 Student Portal Access
@@ -27,16 +48,19 @@ export default function Login() {
 
           <p className="text-lg text-gray-700 max-w-xl">
             Log in to access your courses, track academic progress,
-            and manage everything related to your student life —
-            all from one simple dashboard.
+            and manage everything related to your student life.
           </p>
         </div>
 
-        {/* Right Form (clean + minimal like hero illustration) */}
+        {/* Right Form */}
         <div className="flex justify-center">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
 
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {error && (
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              )}
 
               {/* Email */}
               <div>
@@ -51,7 +75,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full placeholder:text-gray-300  pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -69,7 +93,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full placeholder:text-gray-300 pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                   <button
                     type="button"
@@ -88,9 +112,10 @@ export default function Login() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-60"
               >
-                Sign In
+                {loading ? "Signing in..." : "Sign In"}
               </button>
 
             </form>

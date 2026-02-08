@@ -1,4 +1,25 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+
 export default function Home() {
+  const [user, setUser] = useState(null);
+  
+    // Get logged-in user + listen to auth changes
+    useEffect(() => {
+      supabase.auth.getUser().then(({ data }) => {
+        setUser(data?.user || null);
+      });
+  
+      const { data: listener } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          setUser(session?.user || null);
+        }
+      );
+  
+      return () => {
+        listener.subscription.unsubscribe();
+      };
+    }, []);
   return (
     <section className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center">
       <div className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -6,7 +27,7 @@ export default function Home() {
         {/* Left Content */}
         <div>
           <span className="inline-block bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            📘 Student Academic Platform
+           Hi 👋, {user?.user_metadata?.full_name || "Student"}
           </span>
 
           <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
