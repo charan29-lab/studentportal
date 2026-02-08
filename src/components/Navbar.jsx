@@ -43,10 +43,10 @@ export default function Navbar() {
           <a href="/" className="block text-gray-700 hover:text-blue-600">
             Home
           </a>
-          <a href="/login" className="text-gray-700 hover:text-blue-600">
+          <a href="/login" className="block text-gray-700 hover:text-blue-600">
               Login
             </a>
-            <a href="/register" className="text-gray-700 hover:text-blue-600">
+            <a href="/register" className="block text-gray-700 hover:text-blue-600">
               Register
             </a>
           
