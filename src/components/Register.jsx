@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 export default function Register() {
+  const navigate = useNavigate(); // ✅ added
+
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,18 +23,21 @@ export default function Register() {
       password,
       options: {
         data: {
-          full_name: name, // stored in user metadata
+          full_name: name,
         },
       },
     });
 
     if (error) {
       setError(error.message);
-    } else {
-      console.log("User registered:", data.user);
-      // 👉 redirect example:
-      // navigate("/login");
+      setLoading(false);
+      return;
     }
+
+    console.log("User registered:", data.user);
+
+    // ✅ Navigate to login and pass email
+    navigate("/login", { state: { email } });
 
     setLoading(false);
   };
@@ -116,7 +122,7 @@ export default function Register() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full  placeholder:text-gray-300 pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full placeholder:text-gray-300 pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                   <button
                     type="button"
