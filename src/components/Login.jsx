@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { supabase } from "../lib/supabase";
-import {useNavigate} from "react-router"
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ FIXED
 
 export default function Login() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => location.state?.email ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate()
+
+  // Auto-fill handled during initial state; no effect needed
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -22,12 +27,14 @@ export default function Login() {
 
     if (error) {
       setError(error.message);
-    } else {
-      console.log("Logged in user:", data.user);
-  
-      navigate("/");
+      setLoading(false);
+      return;
     }
 
+    console.log("Logged in user:", data.user);
+
+    // ✅ Redirect to home/dashboard
+    navigate("/");
 
     setLoading(false);
   };
@@ -75,7 +82,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full placeholder:text-gray-300  pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full placeholder:text-gray-300 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
